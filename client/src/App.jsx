@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
 
 function App() {
+    const navigate = useNavigate();
   const [boots, setBoots] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [newBoot, setNewBoot] = useState({
@@ -38,6 +40,7 @@ function App() {
 };
 
   const handleEdit = (boot) => {
+    navigate('/add');
     setEditingId(boot._id);
 
     setNewBoot({
@@ -98,7 +101,7 @@ setEditingId(null);
             image: '',
             description: ''
         });
-
+navigate('/boots');
     } catch (error) {
         alert(error.message);
     }
@@ -109,13 +112,15 @@ setEditingId(null);
       <nav className="navbar">
     <div className="logo">BOOT<span>ZONE</span></div>
 
-    <div className="nav-links">
-        <a href="#">Home</a>
-        <a href="#boots">Football Boots</a>
-        <a href="#add-boot">Add Boot</a>
-    </div>
+<div className="nav-links">
+    <Link to="/">Home</Link>
+    <Link to="/boots">Football Boots</Link>
+    <Link to="/add">Add Boot</Link>
+</div>
 </nav>
 
+<Routes>
+    <Route path="/" element={
 <section className="hero-section">
     <div className="hero-content">
         <span className="hero-tag">BUILT FOR THE GAME</span>
@@ -127,12 +132,17 @@ setEditingId(null);
             every surface and every style of play.
         </p>
 
-        <a href="#boots" className="hero-button">
-            Explore Boots
-        </a>
+   <Link to="/boots" className="hero-button">
+    Explore Boots
+</Link>
     </div>
 </section>
+    } />
 
+
+
+    <Route path="/add" element={
+        <div>
       <h2 id="add-boot">
     {editingId ? 'Edit Football Boot' : 'Add a Football Boot'}
 </h2>
@@ -203,6 +213,12 @@ setEditingId(null);
     {editingId ? 'Update Boot' : 'Add Boot'}
 </button>
 </form>
+        </div>
+    } />
+
+
+    <Route path="/boots" element={
+        <div>
     <h2 id="boots">Football Boots</h2>
 
 <div className="boots-grid">
@@ -229,7 +245,10 @@ setEditingId(null);
 </button>
         </div>
        ))}
-    </div>
+        </div>
+        </div>
+    } />
+</Routes>
     </div>
   );
 }
