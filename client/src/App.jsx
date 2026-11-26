@@ -25,6 +25,29 @@ function App() {
       .catch(error => console.log(error));
   }, []);
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this boot?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `http://localhost:4000/api/boots/${id}`,
+            { method: 'DELETE' }
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to delete boot');
+        }
+
+        setBoots(previousBoots =>
+            previousBoots.filter(boot => boot._id !== id)
+        );
+    } catch (error) {
+        alert(error.message);
+    }
+};
+
   const handleEdit = (boot) => {
     setEditingId(boot._id);
 
@@ -177,6 +200,9 @@ setEditingId(null);
           <p>{boot.description}</p>
           <button onClick={() => handleEdit(boot)}>
     Edit
+</button>
+<button onClick={() => handleDelete(boot._id)}>
+    Delete
 </button>
         </div>
       ))}
