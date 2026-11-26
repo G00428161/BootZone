@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
+import './App.css';
 
 function App() {
   const [boots, setBoots] = useState([]);
@@ -13,17 +15,11 @@ function App() {
     description: ''
 });
 
-  useEffect(() => {
-    fetch('http://localhost:4000/api/boots')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to load boots');
-        }
-        return response.json();
-      })
-      .then(data => setBoots(data))
-      .catch(error => console.log(error));
-  }, []);
+ useEffect(() => {
+    axios.get('http://localhost:4000/api/boots')
+        .then(response => setBoots(response.data))
+        .catch(error => console.log(error));
+}, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this boot?')) {
@@ -31,14 +27,7 @@ function App() {
     }
 
     try {
-        const response = await fetch(
-            `http://localhost:4000/api/boots/${id}`,
-            { method: 'DELETE' }
-        );
-
-        if (!response.ok) {
-            throw new Error('Failed to delete boot');
-        }
+        await axios.delete(`http://localhost:4000/api/boots/${id}`);
 
         setBoots(previousBoots =>
             previousBoots.filter(boot => boot._id !== id)
@@ -73,23 +62,21 @@ const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-        const url = editingId
-    ? `http://localhost:4000/api/boots/${editingId}`
-    : 'http://localhost:4000/api/boots';
+     let response;
 
-const response = await fetch(url, {
-    method: editingId ? 'PUT' : 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newBoot)
-        });
+if (editingId) {
+    response = await axios.put(
+        `http://localhost:4000/api/boots/${editingId}`,
+        newBoot
+    );
+} else {
+    response = await axios.post(
+        'http://localhost:4000/api/boots',
+        newBoot
+    );
+}
 
-        if (!response.ok) {
-            throw new Error('Failed to add boot');
-        }
-
-        const savedBoot = await response.json();
+const savedBoot = response.data;
        if (editingId) {
     setBoots(previousBoots =>
         previousBoots.map(boot =>
@@ -119,8 +106,36 @@ setEditingId(null);
 
   return (
     <div>
-      <h1>BootZone</h1>
-      <h2>Add a Football Boot</h2>
+      <nav className="navbar">
+    <div className="logo">BOOT<span>ZONE</span></div>
+
+    <div className="nav-links">
+        <a href="#">Home</a>
+        <a href="#boots">Football Boots</a>
+        <a href="#add-boot">Add Boot</a>
+    </div>
+</nav>
+
+<section className="hero-section">
+    <div className="hero-content">
+        <span className="hero-tag">BUILT FOR THE GAME</span>
+
+        <h1>Find Your Perfect Football Boots.</h1>
+
+        <p>
+            Discover football boots for every player,
+            every surface and every style of play.
+        </p>
+
+        <a href="#boots" className="hero-button">
+            Explore Boots
+        </a>
+    </div>
+</section>
+
+      <h2 id="add-boot">
+    {editingId ? 'Edit Football Boot' : 'Add a Football Boot'}
+</h2>
 
 <form onSubmit={handleSubmit}>
     <input
@@ -188,10 +203,18 @@ setEditingId(null);
     {editingId ? 'Update Boot' : 'Add Boot'}
 </button>
 </form>
-      <h2>Football Boots</h2>
+    <h2 id="boots">Football Boots</h2>
 
+<div className="boots-grid">
       {boots.map(boot => (
-        <div key={boot._id}>
+     <div key={boot._id} className="boot-card">
+        {boot.image && (
+    <img
+        src={boot.image}
+        alt={boot.name}
+        className="boot-image"
+    />
+)}
           <h3>{boot.name}</h3>
           <p>Brand: {boot.brand}</p>
           <p>Price: €{boot.price}</p>
@@ -205,7 +228,8 @@ setEditingId(null);
     Delete
 </button>
         </div>
-      ))}
+       ))}
+    </div>
     </div>
   );
 }
